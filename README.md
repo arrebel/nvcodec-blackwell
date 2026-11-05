@@ -167,6 +167,16 @@ NVENC/NVDEC codec cores, channel layer and VideoToolbox plug-in ABI all come fro
 repository ports only the H.264 path to Blackwell and speeds up the surface read-out. All credit for the
 original codec work goes to mickys.
 
+### Contributors / 贡献者
+
+| | |
+|---|---|
+| **arrebel** | Blackwell port, benchmarking, packaging and maintenance（Blackwell 移植、实测、打包与维护） |
+| **DeepSeek** | AI-assisted development（AI 辅助开发：代码移植、调试与文档） |
+
+DeepSeek is credited as an assisting tool, not as a copyright holder — the copyright lines in
+[LICENSE](LICENSE) are unchanged. Credit for the original codec work remains with mickys.
+
 ## Licence
 
 MIT, see [LICENSE](LICENSE). Ported from [mickys/nvenc](https://github.com/mickys/nvenc) (MIT); see [NOTICE](NOTICE) for what came from
