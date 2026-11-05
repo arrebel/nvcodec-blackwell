@@ -1,0 +1,17 @@
+<html><head><meta charset="utf-8"><style>
+body { font: 13px -apple-system, "Helvetica Neue", sans-serif; color: #111; }
+h2 { font-size: 15px; margin: 0 0 8px; }
+p { margin: 0 0 9px; line-height: 1.5; }
+code { font-family: Menlo, monospace; font-size: 12px; background: #f2f2f2; padding: 1px 4px; border-radius: 3px; }
+.warn { background: #fff6e5; border-left: 3px solid #e8a33d; padding: 8px 10px; margin: 0 0 10px; }
+.note { color: #555; font-size: 12px; }
+</style></head><body>
+<h2>安装完成</h2>
+<p>已装入 <code>libnvdec_h264.dylib</code> 与 <code>libnvencvt.dylib</code>，解码服务已重启。</p>
+<p class="warn">建议先跑一次实测确认（本插件只在一台 RTX 5070 Ti / GB203 上验证过）：
+用任意 VideoToolbox 解码测试工具跑 1080p H.264，或用 <code>tar.gz</code> 包里的
+<code>sudo ./install.sh --check</code> 查看当前装了哪一版。</p>
+<p>还原：<code>sudo /usr/local/bin/nvdec-uninstall</code>，或重新安装驱动。</p>
+<p class="note">只影响 H.264；HEVC 编解码仍由驱动自带插件处理。日志环境变量：
+<code>VT_DEC_LOG=1</code>（解码）、<code>NVENCVT_LOG=1</code>（编码）。</p>
+</body></html>

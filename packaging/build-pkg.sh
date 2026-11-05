@@ -13,7 +13,7 @@ STAGE=packaging/stage
 [ -f build/libnvdec_h264.dylib ] && [ -f build/libnvencvt.dylib ] || { echo "先构建：sh build.sh（缺 build/libnvdec_h264.dylib 或 build/libnvencvt.dylib）" >&2; exit 1; }
 
 rm -rf "$ROOT" "$STAGE"; mkdir -p "$STAGE"
-mkdir -p "$ROOT$BUNDLE" "$ROOT/usr/local/bin"
+mkdir -p "$ROOT$BUNDLE" "$ROOT/usr/local/bin" "$ROOT/usr/local/share/nvcodec-blackwell"
 
 for f in libnvdec_h264.dylib libnvencvt.dylib; do
     cp "build/$f" "$ROOT$BUNDLE/$f"
@@ -22,6 +22,9 @@ for f in libnvdec_h264.dylib libnvencvt.dylib; do
 done
 cp packaging/nvdec-uninstall "$ROOT/usr/local/bin/nvdec-uninstall"
 chmod 755 "$ROOT/usr/local/bin/nvdec-uninstall"
+# MIT 要求二进制副本附带版权与许可声明
+cp LICENSE NOTICE README.md "$ROOT/usr/local/share/nvcodec-blackwell/"
+chmod 644 "$ROOT/usr/local/share/nvcodec-blackwell/"*
 chmod 755 packaging/scripts/preinstall packaging/scripts/postinstall
 
 pkgbuild --root "$ROOT" --scripts packaging/scripts \

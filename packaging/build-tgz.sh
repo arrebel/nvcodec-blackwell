@@ -15,7 +15,7 @@ OUT=dist/$NAME.tar.gz
     echo "先构建：sh build.sh（缺 build/libnvdec_h264.dylib 或 build/libnvencvt.dylib）" >&2; exit 1; }
 
 rm -rf "$STAGE"; mkdir -p "$STAGE/$NAME/plugins"
-cp "$PKG_SRC/install.sh" "$PKG_SRC/uninstall.sh" "$PKG_SRC/README.md" "$PKG_SRC/LICENSE" "$STAGE/$NAME/"
+cp "$PKG_SRC/install.sh" "$PKG_SRC/uninstall.sh" "$PKG_SRC/README.md" "$PKG_SRC/LICENSE" "$PKG_SRC/NOTICE" "$STAGE/$NAME/"
 cp build/libnvdec_h264.dylib build/libnvencvt.dylib "$STAGE/$NAME/plugins/"
 chmod 755 "$STAGE/$NAME/install.sh" "$STAGE/$NAME/uninstall.sh"
 chmod 755 "$STAGE/$NAME/plugins/"*.dylib
