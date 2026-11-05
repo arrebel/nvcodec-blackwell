@@ -1,10 +1,16 @@
 # nvcodec-blackwell — 50 系硬解
 
-> Based on [mickys/nvenc](https://github.com/mickys/nvenc) · runs on [NullMoth's NVIDIA driver](https://github.com/nullmoth/nvidia-macos-driver) · [中文说明](#中文说明)
+> **Ported from [mickys/nvenc](https://github.com/mickys/nvenc)（移植自 mickys/nvenc）** · runs on [NullMoth's NVIDIA driver](https://github.com/nullmoth/nvidia-macos-driver) · [中文说明](#中文说明)
 
 H.264 hardware **decode and encode** for NVIDIA Blackwell (GB20x, RTX 50) on macOS, through VideoToolbox,
-on top of [NullMoth's NVIDIA driver](https://github.com/nullmoth/nvidia-macos-driver). It derives from
-[mickys/nvenc](https://github.com/mickys/nvenc) and adds Blackwell and a faster read-out path.
+on top of [NullMoth's NVIDIA driver](https://github.com/nullmoth/nvidia-macos-driver).
+
+**This is a port of [mickys/nvenc](https://github.com/mickys/nvenc).** That project implements the NVENC /
+NVDEC VideoToolbox plug-ins for the 40-series (Ada) cards; its `src/` (`blocklinear`, `dec`, `enc`, `hevcdec`,
+`channel`) and `vt/` plug-in ABI are the basis of everything here. This repository takes that code and ports
+it to Blackwell: GB20x device/class detection, the 64-byte × 16-row surface layout, a faster banded read-out
+path, and the VideoToolbox property reporting. Without mickys/nvenc there would be nothing to port — all
+credit for the original codec work belongs there.
 
 The driver already decodes H.264 on these cards, but its plug-in copies every pixel out of the NVDEC
 surface one block at a time. This one walks the surface in 512-byte bands across four threads, which is
@@ -40,6 +46,10 @@ plug-ins off through the driver's own configuration switches.
 
 ## 中文说明
 
+- **来源**：**移植自 [mickys/nvenc](https://github.com/mickys/nvenc)**（MIT）。那套项目是给 40 系（Ada）写的
+  NVENC/NVDEC VideoToolbox 插件；本仓库沿用它的 `src/`（分块排布、解码、编码、通道层）和 `vt/` 插件 ABI，
+  在此之上移植到 Blackwell：GB20x 设备/class 识别、64 字节 × 16 行显存排布、按 band 并行的读出路径，
+  以及 VideoToolbox 硬件属性申报。编解码本体全部来自 mickys 的工作，这里只做 50 系适配与加速。
 - **适用范围**：Blackwell（GB20x）——RTX 5060 / 5060 Ti / 5070 / 5070 Ti / 5080 / 5090，驱动为 nullmoth 1401 / NVRM 2.7.x，macOS 15+ x86_64 黑苹果。
 - **装什么**：只做 H.264。解码插件替换驱动里的 `libnvdec_h264.dylib`，编码插件是外挂的 `libnvencvt.dylib`；HEVC 完全不碰，继续用驱动自带的。
 - **装/卸**：`sudo ./install.sh --check` 先体检，`sudo ./install.sh` 安装，`sudo ./uninstall.sh` 回退。
@@ -91,8 +101,18 @@ codec that comes out of NVDEC in this layout. Derivation, ABI notes and the dead
   version is in place.
 - 8-bit 4:2:0 H.264 only. 10-bit, 4:2:2 and 4:4:4 are not wired up in the decoder plug-in.
 
+## Credits / 致谢
+
+**本项目移植自 [mickys/nvenc](https://github.com/mickys/nvenc)**（MIT）。mickys 实现了 40 系（Ada）上
+NVENC/NVDEC 的视频编解码核心与 VideoToolbox 插件，本仓库的所有编解码代码、通道层、插件 ABI 都来自那里；
+这里做的只是把它移植到 Blackwell（GB20x）并优化读出路径。原始编解码工作的全部功劳归于 mickys。
+
+This project is a **port of [mickys/nvenc](https://github.com/mickys/nvenc)** (MIT). The NVENC/NVDEC codec
+cores, channel layer and VideoToolbox plug-in ABI all come from that project; this repository only ports
+them to Blackwell and speeds up the surface read-out. All credit for the original codec work goes to mickys.
+
 ## Licence
 
-MIT, see [LICENSE](LICENSE). Derived from [mickys/nvenc](https://github.com/mickys/nvenc) (MIT); see [NOTICE](NOTICE) for what came from
+MIT, see [LICENSE](LICENSE). Ported from [mickys/nvenc](https://github.com/mickys/nvenc) (MIT); see [NOTICE](NOTICE) for what came from
 where, and for the terms of the driver this plugs into. Unofficial project — not affiliated with NVIDIA,
 Apple or NullMoth Systems.
