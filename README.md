@@ -1,10 +1,10 @@
 # nvcodec-blackwell — 50 系硬解
 
-> Fork of [mickys/nvenc](https://github.com/mickys/nvenc) · runs on [NullMoth's NVIDIA driver](https://github.com/nullmoth/nvidia-macos-driver) · [中文说明](#中文说明)
+> Based on [mickys/nvenc](https://github.com/mickys/nvenc) · runs on [NullMoth's NVIDIA driver](https://github.com/nullmoth/nvidia-macos-driver) · [中文说明](#中文说明)
 
 H.264 hardware **decode and encode** for NVIDIA Blackwell (GB20x, RTX 50) on macOS, through VideoToolbox,
-on top of [NullMoth's NVIDIA driver](https://github.com/nullmoth/nvidia-macos-driver). A fork of
-[mickys/nvenc](https://github.com/mickys/nvenc) that adds Blackwell and a faster read-out path.
+on top of [NullMoth's NVIDIA driver](https://github.com/nullmoth/nvidia-macos-driver). It derives from
+[mickys/nvenc](https://github.com/mickys/nvenc) and adds Blackwell and a faster read-out path.
 
 The driver already decodes H.264 on these cards, but its plug-in copies every pixel out of the NVDEC
 surface one block at a time. This one walks the surface in 512-byte bands across four threads, which is
@@ -81,7 +81,7 @@ codec that comes out of NVDEC in this layout. Derivation, ABI notes and the dead
 ## Limitations
 
 - **HEVC is not touched.** The shipped HEVC decoder and encoder work on these cards (717 fps 1080p decode,
-  707 fps encode, verified `hvc1` output at 45 dB PSNR) and keep doing the job. This fork's own HEVC core
+  707 fps encode, verified `hvc1` output at 45 dB PSNR) and keep doing the job. This repository's own HEVC core
   hangs on P pictures on Blackwell, so it is not built into the H.264 plug-in.
 - **AV1 is not ported.** The upstream AV1 paths are Ada-only.
 - **GPU attribution**: `kVTDecompressionPropertyKey_UsingGPURegistryID` is answered by VideoToolbox itself,
