@@ -75,7 +75,8 @@ else
     for id in $IDS; do
         n=$((id))
         if [ $n -ge $((0x2a00)) ] && [ $n -le $((0x2fff)) ]; then
-            info "$id 属于 Blackwell（GB20x），适用"
+            info "$id 属于 Blackwell（GB20x），代码路径适用"
+            echo "        注意：本插件仅在 RTX 5070 Ti（GB203）上实机验证过，其他型号请装完跑一次实测。"
         else
             info "$id 不是 Blackwell，插件会自己选择不注册（不会弄坏系统）"
         fi

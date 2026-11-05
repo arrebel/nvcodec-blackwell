@@ -2,6 +2,9 @@
 
 > **Ported from [mickys/nvenc](https://github.com/mickys/nvenc)（移植自 mickys/nvenc）** · runs on [NullMoth's NVIDIA driver](https://github.com/nullmoth/nvidia-macos-driver) · [中文说明](#中文说明)
 
+> ⚠️ **Tested only on an RTX 5070 Ti (GB203).** The code covers the whole GB20x family by device-id and
+> class, but no other RTX 50 card has been verified on real hardware. See [Verified hardware](#verified-hardware).
+
 H.264 hardware **decode and encode** for NVIDIA Blackwell (GB20x, RTX 50) on macOS, through VideoToolbox,
 on top of [NullMoth's NVIDIA driver](https://github.com/nullmoth/nvidia-macos-driver).
 
@@ -15,6 +18,21 @@ credit for the original codec work belongs there.
 The driver already decodes H.264 on these cards, but its plug-in copies every pixel out of the NVDEC
 surface one block at a time. This one walks the surface in 512-byte bands across four threads, which is
 where the 3× comes from — same engine, same picture, less CPU.
+
+## Verified hardware
+
+**Only one card has been tested: RTX 5070 Ti (GB203, PCI `0x2c05`), macOS 26.7.2, driver 2.7.1.**
+
+The code is written for the whole GB20x family (device-id `0x2a00`–`0x2fff`, NVDEC `0xcfb0`,
+NVENC `0xcfb7`), and the surface layout is derived from bytes-per-pixel and pitch rather than a
+card-specific constant — so RTX 5060 / 5060 Ti / 5070 / 5080 / 5090 *should* take the same path.
+But **none of them has been run**. Two things can still differ on an untested card: whether the
+NullMoth driver itself supports that GPU, and which NVENC engine index opens (the encoder retries
+with the other engine if `0x1c` fails). On a new card, run `sudo ./install.sh --check` and then a
+decode/encode benchmark; if anything fails, `sudo ./uninstall.sh` rolls back cleanly.
+
+**实机只在 RTX 5070 Ti（GB203）上验证过**，其他 50 系型号均未经测试。代码覆盖整个 GB20x，但「应该能跑」
+不等于「验证可用」；换卡请先体检再实测，有问题用 `uninstall.sh` 回退。
 
 ## Performance
 
@@ -50,11 +68,15 @@ plug-ins off through the driver's own configuration switches.
   NVENC/NVDEC VideoToolbox 插件；本仓库沿用它的 `src/`（分块排布、解码、编码、通道层）和 `vt/` 插件 ABI，
   在此之上移植到 Blackwell：GB20x 设备/class 识别、64 字节 × 16 行显存排布、按 band 并行的读出路径，
   以及 VideoToolbox 硬件属性申报。编解码本体全部来自 mickys 的工作，这里只做 50 系适配与加速。
-- **适用范围**：Blackwell（GB20x）——RTX 5060 / 5060 Ti / 5070 / 5070 Ti / 5080 / 5090，驱动为 nullmoth 1401 / NVRM 2.7.x，macOS 15+ x86_64 黑苹果。
+- **实机验证**：**仅 RTX 5070 Ti（GB203，PCI `0x2c05`）**，macOS 26.7.2，NVRM 2.7.1 / 1401，x86_64 黑苹果。
+- **适用范围**：代码按整个 GB20x 写（device-id `0x2a00`–`0x2fff`），显存排布由每像素字节数与 pitch 推导，
+  理论覆盖 RTX 5060 / 5060 Ti / 5070 / 5080 / 5090，**但这些型号一张都没实测过**。未验证的卡上还有两个
+  变数：驱动本身是否支持该 GPU，以及 NVENC 引擎编号（打不开 `0x1c` 时会自动换另一个重试）。换卡请先
+  `sudo ./install.sh --check`，再跑一次解码/编码实测；异常用 `sudo ./uninstall.sh` 完整回退。
 - **装什么**：只做 H.264。解码插件替换驱动里的 `libnvdec_h264.dylib`，编码插件是外挂的 `libnvencvt.dylib`；HEVC 完全不碰，继续用驱动自带的。
 - **装/卸**：`sudo ./install.sh --check` 先体检，`sudo ./install.sh` 安装，`sudo ./uninstall.sh` 回退。
 - **驱动升级后**：新版驱动会把插件文件覆盖回官方版本，重跑一次 `install.sh` 即可。装完 `--check` 应显示"已安装（我们的版本）"。
-- **实测数字**：1080p 解码 700–920 fps（软解 471），4K 解码 229 fps，1080p 编码 718 fps（软编 156）。
+- **实测数字**（均来自 RTX 5070 Ti / GB203，其他型号未测）：1080p 解码 700–920 fps（软解 471），4K 解码 229 fps，1080p 编码 718 fps（软编 156）。
 
 ## Build
 
@@ -90,6 +112,9 @@ codec that comes out of NVDEC in this layout. Derivation, ABI notes and the dead
 
 ## Limitations
 
+- **Only verified on RTX 5070 Ti (GB203).** Other GB20x cards are supported by the code but untested on
+  real hardware — see [Verified hardware](#verified-hardware). All numbers in this README come from that
+  one card.
 - **HEVC is not touched.** The shipped HEVC decoder and encoder work on these cards (717 fps 1080p decode,
   707 fps encode, verified `hvc1` output at 45 dB PSNR) and keep doing the job. This repository's own HEVC core
   hangs on P pictures on Blackwell, so it is not built into the H.264 plug-in.

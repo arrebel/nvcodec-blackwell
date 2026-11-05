@@ -6,6 +6,9 @@ them through VideoToolbox on macOS for the 40-series (Ada) cards; its codec core
 ABI are the basis of this repository. This port adds GB20x support and a faster H.264 read-out path. All
 credit for the original NVENC/NVDEC work belongs to mickys.
 
+The GB20x code path covers device-id `0x2a00`–`0x2fff`, but it has been **tested on real hardware only
+with an RTX 5070 Ti (GB203)**. No other RTX 50 card is verified; see README for details.
+
 - `src/`, `tools/`, `src/vt/` derive from mickys/nvenc, MIT, Copyright (c) 2026 mickys.
 - `src/blocklinear.c` (Blackwell 64-byte × 16-row tile layout, banded multithreaded untiling), `src/dec.c`
   layout selection, `src/vt/vtnencvt.c` GB20x detection and the VideoToolbox property reporting are

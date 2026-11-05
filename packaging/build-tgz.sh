@@ -24,6 +24,10 @@ cat > "$STAGE/$NAME/VERSION" <<EOF
 version=$VER
 tested_driver=2.7.1
 tested_gpu=GB203 (RTX 5070 Ti)
+tested_gpu_pci=0x2c05
+tested_macos=26.7.2
+# 代码覆盖 0x2a00-0x2fff 整个 GB20x，但只有上面这一张卡实机验证过，其他型号未测。
+verified_gpu_only=GB203
 build=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 EOF
 
