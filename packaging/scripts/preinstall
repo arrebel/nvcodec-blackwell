@@ -1,0 +1,26 @@
+#!/bin/sh
+# preinstall — 在载荷覆盖之前留住原厂插件。
+#
+# 只有「当前文件确实是原厂插件」时才备份：如果我们自己的插件已经在里面，再备份就会把唯一的原厂副本覆盖掉
+# （这个坑踩过一次，代价是原厂 H.264 插件只能靠重装驱动找回）。
+set -e
+B=/Library/GPUBundles/NVMTLDriver.bundle/Contents/MacOS
+[ -d "$B" ] || { echo "NVIDIA 驱动目录不存在：$B" >&2; exit 1; }
+
+# 只认编译进插件的标记串：原厂插件的日志前缀（nvdec-vt:）和我们一样，靠它区分不出来
+is_ours() { [ -f "$1" ] && strings -a "$1" 2>/dev/null | grep -q "nvcodec-blk-1401"; }
+
+# libnvdec_h264.dylib 驱动自带；libnvencvt.dylib 是外挂的，第一次装时不存在，属正常。
+# 备份只在不存在时创建，之后永不覆盖：升级驱动后重新安装，绝不能拿我们的文件盖掉唯一一份原厂副本。
+for name in libnvdec_h264.dylib libnvencvt.dylib; do
+    p="$B/$name"
+    if [ -f "$p.vendor" ]; then
+        echo "$name.vendor 已存在，保留不动"
+    elif [ -f "$p" ] && ! is_ours "$p"; then
+        cp -p "$p" "$p.vendor"
+        echo "已备份原厂 $name -> $name.vendor"
+    else
+        echo "$name 无需备份（不存在或已是本插件）"
+    fi
+done
+exit 0

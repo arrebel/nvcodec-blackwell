@@ -1,0 +1,4 @@
+version=1.2.0
+tested_driver=2.7.1
+tested_gpu=GB203 (RTX 5070 Ti)
+tested_macos=26.7.2

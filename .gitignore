@@ -1,0 +1,22 @@
+# build products
+build/
+dist/
+packaging/root/
+packaging/stage/
+packaging/tgz-stage/
+
+# NVIDIA headers, fetched by fetch-vendor.sh (never commit: 50 MB, and not ours)
+vendor/
+
+# install/uninstall side effects on this machine
+*.dylib.vendor
+*.orig
+
+# test media (bring your own: see tests/README.md)
+*.mov
+*.mp4
+*.h264
+*.hevc
+
+# macOS
+.DS_Store

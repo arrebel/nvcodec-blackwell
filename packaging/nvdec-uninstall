@@ -1,0 +1,36 @@
+#!/bin/sh
+# nvdec-uninstall — 停用本插件，把 H.264 交回系统实现。
+#
+# 为什么不是删文件：/Library/GPUBundles/NVMTLDriver.bundle/Contents/MacOS 带 SIP 的 restricted 标志，
+# 即使 root 也不能在该目录里增删文件（只有安装器可以）。所以卸载走驱动自己的配置开关：
+#   NVMTL_NO_NVDEC=1   —— 不注册我们的 H.264 解码插件（HEVC 解码和其它功能都不受影响）
+#   去掉 NVMTL_NVENCVT —— 不加载外挂的 H.264 编码插件
+# 如果旁边有一份真正的原厂插件备份，则先把它拷回去（覆盖文件内容是允许的）。
+set -e
+B=/Library/GPUBundles/NVMTLDriver.bundle/Contents/MacOS
+CONF=/Library/GPUBundles/nvmtl/nvrm610.conf
+
+# 只认编译进插件的标记串（原厂插件的日志前缀和我们一样，分不出来）
+is_ours() { [ -f "$1" ] && strings -a "$1" 2>/dev/null | grep -q "nvcodec-blk-1401"; }
+
+# 1) 有原厂备份就还原（只认真正原厂的，不认我们自己的旧版本）
+if [ -f "$B/libnvdec_h264.dylib.vendor" ] && ! is_ours "$B/libnvdec_h264.dylib.vendor"; then
+    cp -p "$B/libnvdec_h264.dylib.vendor" "$B/libnvdec_h264.dylib"
+    chown root:wheel "$B/libnvdec_h264.dylib"; chmod 755 "$B/libnvdec_h264.dylib"
+    echo "已还原原厂 libnvdec_h264.dylib"
+else
+    echo "没有原厂备份（或备份本身就是我们的旧版本），改用配置开关停用解码插件"
+fi
+
+# 2) 配置开关：去掉编码器开关，加上解码停用标记
+if [ -f "$CONF" ]; then
+    [ -f "$CONF.orig" ] || cp -p "$CONF" "$CONF.orig"
+    # 不用临时文件（安装器的沙箱里连 mktemp 的清理都会被拒）：先在变量里拼好，再覆盖写回去
+    KEEP=$(grep -vE '^(NVMTL_NVENCVT|NVMTL_NO_NVDEC)=' "$CONF" || true)
+    printf '%s\nNVMTL_NO_NVDEC=1\nNVMTL_NVENCVT=0\n' "$KEEP" > "$CONF"
+    echo "已停用 H.264 解码与编码插件（nvrm610.conf: NVMTL_NO_NVDEC=1, NVMTL_NVENCVT=0）"
+fi
+
+
+killall VTDecoderXPCService 2>/dev/null || true
+echo "还原完成。想重新启用，重新运行安装包即可（postinstall 会去掉停用标记）。"

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="2">
+    <title>NVIDIA 视频编解码插件（1401 / 2.7.1）</title>
+    <organization>local.nvdec</organization>
+    <domains enable_localSystem="true" enable_currentUserHome="false"/>
+    <options customize="never" require-scripts="true" rootVolumeOnly="true" hostArchitectures="x86_64"/>
+
+    <volume-check>
+        <allowed-os-versions>
+            <os-version min="15.0"/>
+        </allowed-os-versions>
+    </volume-check>
+
+    <installation-check script="nvdecCheck()"/>
+    <script><![CDATA[
+function nvdecCheck() {
+    if (!system.files.fileExistsAtPath('/Library/GPUBundles/NVMTLDriver.bundle/Contents/MacOS/NVMTLDriver')) {
+        my.result.message = '没有找到 nullmoth 驱动的 NVMTLDriver.bundle，请先安装 2.7.1 (1401) 驱动。';
+        my.result.type = 'Fatal';
+        return false;
+    }
+    if (!system.files.fileExistsAtPath('/Library/GPUBundles/nvmtl/nvrm610.conf')) {
+        my.result.message = '没有找到 /Library/GPUBundles/nvmtl/nvrm610.conf，驱动版本可能不是 2.7.1 (1401)。';
+        my.result.type = 'Fatal';
+        return false;
+    }
+    return true;
+}
+]]></script>
+
+    <welcome file="welcome.html" mime-type="text/html"/>
+    <conclusion file="conclusion.html" mime-type="text/html"/>
+
+    <choices-outline>
+        <line choice="default">
+            <line choice="nvdec"/>
+        </line>
+    </choices-outline>
+    <choice id="default"/>
+    <choice id="nvdec" visible="false">
+        <pkg-ref id="local.nvdec.blackwell.h264"/>
+    </choice>
+    <pkg-ref id="local.nvdec.blackwell.h264" version="1.2.0" onConclusion="none">nvdec.pkg</pkg-ref>
+</installer-gui-script>

@@ -1,0 +1,29 @@
+#!/bin/sh
+# postinstall — 修所有权、签名，打开驱动里的外部编码器开关，重启解码服务。
+set -e
+B=/Library/GPUBundles/NVMTLDriver.bundle/Contents/MacOS
+CONF=/Library/GPUBundles/nvmtl/nvrm610.conf
+
+for name in libnvdec_h264.dylib libnvencvt.dylib; do
+    chown root:wheel "$B/$name"
+    chmod 755 "$B/$name"
+    codesign -f -s - "$B/$name" >/dev/null 2>&1 || true
+done
+
+# 驱动里的开关：NVMTL_NVENCVT 打开外挂编码器；NVMTL_NO_NVDEC 是 nvdec-uninstall 留下的“停用”标记，
+# 重装时把它去掉，插件才会真正生效。
+if [ -f "$CONF" ]; then
+    [ -f "$CONF.orig" ] || cp -p "$CONF" "$CONF.orig"
+    KEEP=$(grep -vE '^(NVMTL_NO_NVDEC|NVMTL_NVENCVT)=' "$CONF" || true)
+    printf '%s\nNVMTL_NVENCVT=1\n' "$KEEP" > "$CONF"
+fi
+
+# VideoToolbox 在 VTDecoderXPCService 里解码，不重启就一直用旧插件
+killall VTDecoderXPCService 2>/dev/null || true
+
+V=$(plutil -extract CFBundleShortVersionString raw /Library/Extensions/NVRM.kext/Contents/Info.plist 2>/dev/null || echo "?")
+if [ "$V" != "2.7.1" ]; then
+    echo "注意：当前 NVRM 版本为 $V，本包按 2.7.1 (1401) 构建。插件仍会装入，如遇问题可用 nvdec-uninstall 还原。"
+fi
+echo "H.264 硬件解码与编码插件已安装（卸载用 /usr/local/bin/nvdec-uninstall）。"
+exit 0
