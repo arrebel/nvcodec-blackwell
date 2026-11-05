@@ -2,6 +2,10 @@
 
 > **Ported from [mickys/nvenc](https://github.com/mickys/nvenc) — H.264 only（只移植了 H.264）** · runs on [NullMoth's NVIDIA driver](https://github.com/nullmoth/nvidia-macos-driver) · [中文说明](#中文说明)
 
+> 🧪 **For testing only / 仅供测试。** An unofficial, experimental plug-in for a Hackintosh driver — not
+> production software. No warranty, no support, and it can stop working after any driver update. Do not
+> rely on it for important exports, archival or playback; keep a working software fallback.
+
 > ⚠️ **Tested only on an RTX 5070 Ti (GB203).** The code covers the whole GB20x family by device-id and
 > class, but no other RTX 50 card has been verified on real hardware. See [Verified hardware](#verified-hardware).
 
@@ -65,6 +69,8 @@ plug-ins off through the driver's own configuration switches.
 
 ## 中文说明
 
+- **用途**：**仅供测试**。非官方、实验性插件，无担保、无支持；它替换第三方驱动里的插件文件，驱动升级后
+  可能失效，且只在一台机器上跑过。不要用于重要导出、归档或生产工作流，务必保留软件编解码作为退路。
 - **来源**：**移植自 [mickys/nvenc](https://github.com/mickys/nvenc) 的 H.264 部分**（MIT）。那套项目是给
   40 系（Ada）写的 NVENC/NVDEC VideoToolbox 插件；本仓库沿用它的 `src/`（分块排布、解码、编码、通道层）和
   `vt/` 插件 ABI，在此之上**只把 H.264 解码/编码路径**移植到 Blackwell：GB20x 设备/class 识别、64 字节 ×
@@ -142,6 +148,9 @@ AV1 上游路径只支持 Ada。HEVC 编解码继续由驱动自带的插件负�
 
 ## Limitations
 
+- **For testing only.** Unofficial, experimental, not production software — no warranty or support. It
+  replaces a plug-in inside a third-party driver, may break on driver updates, and has only been run on
+  one machine. Keep the software path available as a fallback.
 - **Only verified on RTX 5070 Ti (GB203).** Other GB20x cards are supported by the code but untested on
   real hardware — see [Verified hardware](#verified-hardware). All numbers in this README come from that
   one card.

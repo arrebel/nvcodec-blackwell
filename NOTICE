@@ -21,6 +21,16 @@ ported to Blackwell nor registered by the VideoToolbox plug-ins, and carry the s
 - `src/vtdec.c` is the H.264 decoder plug-in here; `src/vt/nvencvt_dec.c` in the upstream tree is a
   multi-codec plug-in and is not used here.
 
+## For testing only / 仅供测试
+
+This is unofficial, experimental software intended for testing on a Hackintosh. It is **not production
+software**: there is no warranty or support, it replaces a file inside a third-party driver installation,
+and it may stop working after any driver update. It has been verified on one machine only. Users should
+keep a working software decode/encode path as a fallback. The MIT licence applies as written, including
+its "AS IS" disclaimer.
+
+本软件**仅供测试**，非生产用途：无担保、无支持，会替换第三方驱动内的插件文件，驱动升级后可能失效。
+
 ## Contributors
 
 - **arrebel** — Blackwell port, benchmarking, packaging and maintenance.
