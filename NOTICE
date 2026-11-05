@@ -1,13 +1,18 @@
 # NOTICE
 
-**nvcodec-blackwell** is a **port of [mickys/nvenc](https://github.com/mickys/nvenc)** (MIT) to NVIDIA
-Blackwell (GB20x, RTX 50). mickys/nvenc drives the NVIDIA NVENC/NVDEC engines from user space and exposes
-them through VideoToolbox on macOS for the 40-series (Ada) cards; its codec cores and VideoToolbox plug-in
-ABI are the basis of this repository. This port adds GB20x support and a faster H.264 read-out path. All
-credit for the original NVENC/NVDEC work belongs to mickys.
+**nvcodec-blackwell** is a **port of the H.264 part of [mickys/nvenc](https://github.com/mickys/nvenc)**
+(MIT) to NVIDIA Blackwell (GB20x, RTX 50). mickys/nvenc drives the NVIDIA NVENC/NVDEC engines from user
+space and exposes them through VideoToolbox on macOS for the 40-series (Ada) cards; its codec cores and
+VideoToolbox plug-in ABI are the basis of this repository. This port adds GB20x support for that H.264 path
+and a faster read-out. All credit for the original NVENC/NVDEC work belongs to mickys.
 
 The GB20x code path covers device-id `0x2a00`–`0x2fff`, but it has been **tested on real hardware only
 with an RTX 5070 Ti (GB203)**. No other RTX 50 card is verified; see README for details.
+
+**Scope: only H.264 is ported, enabled and verified.** `src/` retains the full upstream source tree
+(`hevcdec.c`, `av1dec.c`, `vp9dec.c`, `mpeg2dec.c`, `vc1dec.c`, …) because the encoder links the shared
+`enc.c` / `dec.c` / `rm.c` code. Those files are the untouched mickys/nvenc baseline: they are neither
+ported to Blackwell nor registered by the VideoToolbox plug-ins, and carry the same MIT licence.
 
 - `src/`, `tools/`, `src/vt/` derive from mickys/nvenc, MIT, Copyright (c) 2026 mickys.
 - `src/blocklinear.c` (Blackwell 64-byte × 16-row tile layout, banded multithreaded untiling), `src/dec.c`

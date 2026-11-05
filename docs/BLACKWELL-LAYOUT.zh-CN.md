@@ -1,4 +1,8 @@
-# NVIDIA 视频编解码插件（Blackwell / RTX 50 系）
+# H.264 编解码插件移植记录（Blackwell / RTX 50 系）
+
+代码移植自 [mickys/nvenc](https://github.com/mickys/nvenc)（MIT）的 **H.264 部分**。
+**只移植、只启用、只验证了 H.264 解码与编码**；`src/` 里其余编解码器源码是未改动的上游基线，
+未移植到 Blackwell，也未注册。实机只在 RTX 5070 Ti（GB203）上验证过。
 
 在 nullmoth 的 `NVMTLDriver`（2.7.1 / 1401）之上，用两个自建插件把 **H.264 硬解和硬编**
 接进 VideoToolbox，做到和 [mickys/nvenc](https://github.com/mickys/nvenc) 在 40 系上 NVEncVT 一样的效果：
@@ -68,7 +72,9 @@ off = (y/16)*pitch*16 + (x/tp)*1024 + ((y%16)/8)*512 + ((x%tp)/8)*64*bpp + (y%8)
 ```
 
 配 SSE2 位带拷贝 + 大平面 4 线程的 `bw_untile_plane`：1080p 反平铺 **0.13 ms/帧**（原厂 4.28 ms）。
-`dec.c` / `hevcdec.c` 按 NVDEC class（≥0xcfb0）自动选布局，`DEC_LAYOUT=kbl|bw` 可覆盖。
+`dec.c` 按 NVDEC class（≥0xcfb0）自动选布局，`DEC_LAYOUT=kbl|bw` 可覆盖。`hevcdec.c` 里也留过一套
+Blackwell 布局实验代码，但自有 HEVC 解码核在 Blackwell 上 P 帧会挂死（引擎不返回），**未启用、未验证**；
+HEVC 解码继续用驱动自带的插件。本文件后面提到的 HEVC 条目都是这个状态，不要当成可用功能。
 
 ### 2. VideoToolbox 插件 ABI（`src/vtdec.c`、`src/vt/vtnvenc.c`）
 
