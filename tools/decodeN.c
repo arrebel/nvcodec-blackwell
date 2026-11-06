@@ -25,10 +25,13 @@ static double psnr(const uint8_t *a, const uint8_t *b, size_t n)
 
 int main(int argc, char **argv)
 {
-    int ai = 1; bool verbose = false; int limit = 1000000;
+    int ai = 1; bool verbose = false; int limit = 1000000; const char *dump = NULL;
     if (ai < argc && !strcmp(argv[ai], "-v")) { verbose = true; ai++; }
     if (ai + 1 < argc && !strcmp(argv[ai], "-n")) { limit = atoi(argv[ai + 1]); ai += 2; }
-    if (argc - ai < 2) { fprintf(stderr, "usage: decodeN [-v] [-n pictures] in.h264 ref.yuv\n"); return 2; }
+    if (ai + 1 < argc && !strcmp(argv[ai], "-o")) { dump = argv[ai + 1]; ai += 2; }
+    if (argc - ai < 2) { fprintf(stderr, "usage: decodeN [-v] [-n pictures] [-o out.yuv] in.h264 ref.yuv\n"); return 2; }
+    FILE *df = NULL;
+    if (dump) { df = fopen(dump, "wb"); if (!df) { perror(dump); return 1; } }
     FILE *f = fopen(argv[ai], "rb"); if (!f) { perror(argv[ai]); return 1; }
     fseek(f, 0, SEEK_END); size_t n = (size_t)ftell(f); fseek(f, 0, SEEK_SET);
     uint8_t *in = malloc(n); if (fread(in, 1, n, f) != n) return 1; fclose(f);
@@ -84,6 +87,7 @@ int main(int argc, char **argv)
         h264dec_read_nv12(&d, d.cur_surf, nv, w, nv + (size_t)w * h, w, w, h);
         rd += clock_gettime_nsec_np(CLOCK_MONOTONIC) / 1e6 - r0; gReadMs = rd;
         memcpy(out, nv, (size_t)w * h);
+        if (df) fwrite(out, 1, fs, df);
         for (size_t i = 0; i < (size_t)w * h / 4; i++) { out[(size_t)w * h + i] = nv[(size_t)w * h + 2 * i]; out[(size_t)w * h * 5 / 4 + i] = nv[(size_t)w * h + 2 * i + 1]; }
         const int disp = done < gNP ? gPics[done].disp : -1;
         double ps = 0;
