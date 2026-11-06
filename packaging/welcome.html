@@ -7,15 +7,16 @@ code { font-family: Menlo, monospace; font-size: 12px; background: #f2f2f2; padd
 .note { color: #555; font-size: 12px; }
 </style></head><body>
 <h2>50 系硬解 — H.264 硬件解码 / 编码插件</h2>
-<p class="warn"><b>仅供测试。</b>非官方实验性插件，无担保、无支持；仅在 RTX 5070 Ti（GB203）上实机验证过，
-驱动升级后可能失效。不要用于重要导出或生产工作流。</p>
-<p>在 nullmoth NVRM 2.7.1（1401）之上，替换驱动自带的 H.264 解码插件并装入 H.264 编码插件，
+<p class="warn"><b>仅供测试。</b>非官方实验性插件，无担保、无支持；已在 RTX 5070 Ti（GB203）与
+RTX 5060 Ti（GB206）上实机验证过，驱动升级后可能失效。不要用于重要导出或生产工作流。</p>
+<p>在 nullmoth NVRM 2.7.1 / 2.7.2 之上，替换驱动自带的 H.264 解码插件并装入 H.264 编码插件，
 移植自 <a href="https://github.com/mickys/nvenc">mickys/nvenc</a>（MIT）的 H.264 部分。</p>
 <ul>
 <li>1080p H.264 解码约 <b>700–920 fps</b>（原厂插件 235–239 fps、苹果软解 471 fps）</li>
 <li>1080p H.264 编码约 <b>718 fps</b>（苹果软编 156 fps）</li>
 <li>300 帧解码与苹果软解<b>逐字节一致</b></li>
 </ul>
+<p class="note">以上数字来自 RTX 5070 Ti；RTX 5060 Ti 上另测得 1080p 硬解 779–800 fps（驱动 2.7.2）。</p>
 <p class="note"><b>只涉及 H.264。</b>HEVC 的解码与编码继续由驱动自带的插件负责，本包不替换；
 AV1 / VP9 等未移植、未启用。</p>
 <p class="note">原厂 H.264 插件会备份成 <code>libnvdec_h264.dylib.vendor</code>。还原：

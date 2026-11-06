@@ -6,8 +6,9 @@
 > production software. No warranty, no support, and it can stop working after any driver update. Do not
 > rely on it for important exports, archival or playback; keep a working software fallback.
 
-> ⚠️ **Tested only on an RTX 5070 Ti (GB203).** The code covers the whole GB20x family by device-id and
-> class, but no other RTX 50 card has been verified on real hardware. See [Verified hardware](#verified-hardware).
+> ⚠️ **Verified on real hardware: RTX 5070 Ti (GB203) and RTX 5060 Ti (GB206).** The code covers the
+> whole GB20x family by device-id and class, but no other RTX 50 card has been tested. See
+> [Verified hardware](#verified-hardware).
 
 H.264 hardware **decode and encode** for NVIDIA Blackwell (GB20x, RTX 50) on macOS, through VideoToolbox,
 on top of [NullMoth's NVIDIA driver](https://github.com/nullmoth/nvidia-macos-driver).
@@ -26,17 +27,31 @@ where the 3× comes from — same engine, same picture, less CPU.
 
 ## Verified hardware
 
-**Only one card has been tested: RTX 5070 Ti (GB203, PCI `0x2c05`), macOS 26.7.2, driver 2.7.1.**
+**Two cards have been tested on real hardware:**
+
+| Card | GPU / PCI id | macOS | NullMoth driver | What was run |
+|---|---|---|---|---|
+| RTX 5070 Ti | GB203, `0x2c05` | 26.7.2 | 2.7.1 | Full H.264 decode/encode benchmark, 4K, PSNR and byte-identity checks (all numbers below) |
+| RTX 5060 Ti 8 GB | GB206, `0x2d04` | 26.7.2 (25G332) | 2.7.2 | 2026-11-06: H.264 1080p hardware decode, 120/120 frames, **779–800 fps** over two sessions; encoder plug-in registered as `org.nvenc.videoencoder.avc` (`mickys/nvenc 0.9.5-bw`) |
+
+The 5060 Ti run also confirms the plug-ins load on driver 2.7.2, not just the 2.7.1 used on the
+5070 Ti. Only the 1080p decode path was benchmarked on the 5060 Ti — 4K, encode throughput, PSNR
+and byte-identity were measured on the 5070 Ti only. As usual, VideoToolbox does not report the GPU
+registry id for these sessions (see [Limitations](#limitations)), so these runs are classified as
+"hardware decode confirmed" rather than "GPU attribution confirmed".
 
 The code is written for the whole GB20x family (device-id `0x2a00`–`0x2fff`, NVDEC `0xcfb0`,
 NVENC `0xcfb7`), and the surface layout is derived from bytes-per-pixel and pitch rather than a
-card-specific constant — so RTX 5060 / 5060 Ti / 5070 / 5080 / 5090 *should* take the same path.
-But **none of them has been run**. Two things can still differ on an untested card: whether the
+card-specific constant — so RTX 5060 / 5070 / 5080 / 5090 *should* take the same path.
+But **none of those has been run**. Two things can still differ on an untested card: whether the
 NullMoth driver itself supports that GPU, and which NVENC engine index opens (the encoder retries
 with the other engine if `0x1c` fails). On a new card, run `sudo ./install.sh --check` and then a
 decode/encode benchmark; if anything fails, `sudo ./uninstall.sh` rolls back cleanly.
 
-**实机只在 RTX 5070 Ti（GB203）上验证过**，其他 50 系型号均未经测试。代码覆盖整个 GB20x，但「应该能跑」
+**实机已在两张卡上验证：RTX 5070 Ti（GB203）与 RTX 5060 Ti（GB206，PCI `0x2d04`）**。5060 Ti 上是
+macOS 26.7.2 (25G332) + 驱动 2.7.2，1080p H.264 硬解两轮分别 781 / 798 fps（每轮取 3 次中位数，
+120/120 帧无丢帧），编码插件也正常注册；完整基准（4K、编码、PSNR、逐字节比对）仍只在 5070 Ti 上跑过。
+其余 50 系型号（5060 / 5070 / 5080 / 5090）均未经测试。代码覆盖整个 GB20x，但「应该能跑」
 不等于「验证可用」；换卡请先体检再实测，有问题用 `uninstall.sh` 回退。
 
 ## Performance
@@ -52,6 +67,10 @@ RTX 5070 Ti (GB203), macOS 26.7.2, driver 2.7.1, 8–30 Mbps H.264 4:2:0 8-bit:
 
 Correctness, not just throughput: 300 decoded frames are **byte-identical** to Apple's software decoder,
 and the encoder lands 32.1 dB PSNR at the bitrate where Apple's software encoder gets 28.6 dB.
+
+On the RTX 5060 Ti (GB206, driver 2.7.2) a separate 1080p hardware-decode run measured **779–800 fps**
+(120/120 frames, median of 3 rounds, two sessions on 2026-11-06). The 4K, encode and correctness
+numbers above are from the 5070 Ti only.
 
 ## Install
 
@@ -70,15 +89,17 @@ plug-ins off through the driver's own configuration switches.
 ## 中文说明
 
 - **用途**：**仅供测试**。非官方、实验性插件，无担保、无支持；它替换第三方驱动里的插件文件，驱动升级后
-  可能失效，且只在一台机器上跑过。不要用于重要导出、归档或生产工作流，务必保留软件编解码作为退路。
+  可能失效，且目前只在两张卡上实机验证过。不要用于重要导出、归档或生产工作流，务必保留软件编解码作为退路。
 - **来源**：**移植自 [mickys/nvenc](https://github.com/mickys/nvenc) 的 H.264 部分**（MIT）。那套项目是给
   40 系（Ada）写的 NVENC/NVDEC VideoToolbox 插件；本仓库沿用它的 `src/`（分块排布、解码、编码、通道层）和
   `vt/` 插件 ABI，在此之上**只把 H.264 解码/编码路径**移植到 Blackwell：GB20x 设备/class 识别、64 字节 ×
   16 行显存排布、按 band 并行的读出路径，以及 VideoToolbox 硬件属性申报。编解码本体全部来自 mickys 的工作，
   这里只做 50 系适配与加速；其他编解码器源码是未移植的上游基线，见 [Scope](#scope)。
-- **实机验证**：**仅 RTX 5070 Ti（GB203，PCI `0x2c05`）**，macOS 26.7.2，NVRM 2.7.1 / 1401，x86_64 黑苹果。
+- **实机验证**：**RTX 5070 Ti（GB203，PCI `0x2c05`）**，macOS 26.7.2，NVRM 2.7.1 / 1401；**RTX 5060 Ti
+  8 GB（GB206，PCI `0x2d04`）**，macOS 26.7.2 (25G332)，NVRM 2.7.2，2026-11-06 实测 1080p H.264 硬解
+  781 / 798 fps、编码插件注册成功。均为 x86_64 黑苹果。
 - **适用范围**：代码按整个 GB20x 写（device-id `0x2a00`–`0x2fff`），显存排布由每像素字节数与 pitch 推导，
-  理论覆盖 RTX 5060 / 5060 Ti / 5070 / 5080 / 5090，**但这些型号一张都没实测过**。未验证的卡上还有两个
+  理论覆盖 RTX 5060 / 5060 Ti / 5070 / 5080 / 5090，**除上述两张卡外其余型号均未实测**。未验证的卡上还有两个
   变数：驱动本身是否支持该 GPU，以及 NVENC 引擎编号（打不开 `0x1c` 时会自动换另一个重试）。换卡请先
   `sudo ./install.sh --check`，再跑一次解码/编码实测；异常用 `sudo ./uninstall.sh` 完整回退。
 - **装什么**：**只移植、只启用、只验证了 H.264**（解码 + 编码）。解码插件替换驱动里的
@@ -87,7 +108,8 @@ plug-ins off through the driver's own configuration switches.
   没有验证**；HEVC 完全不碰，解码和编码继续用驱动自带的插件。详见 [Scope](#scope)。
 - **装/卸**：`sudo ./install.sh --check` 先体检，`sudo ./install.sh` 安装，`sudo ./uninstall.sh` 回退。
 - **驱动升级后**：新版驱动会把插件文件覆盖回官方版本，重跑一次 `install.sh` 即可。装完 `--check` 应显示"已安装（我们的版本）"。
-- **实测数字**（均来自 RTX 5070 Ti / GB203，其他型号未测）：1080p 解码 700–920 fps（软解 471），4K 解码 229 fps，1080p 编码 718 fps（软编 156）。
+- **实测数字**：完整基准均来自 RTX 5070 Ti / GB203：1080p 解码 700–920 fps（软解 471），4K 解码 229 fps，
+  1080p 编码 718 fps（软编 156）。RTX 5060 Ti / GB206 上另测得 1080p 硬解 779–800 fps。
 
 ## Build
 
@@ -150,10 +172,10 @@ AV1 上游路径只支持 Ada。HEVC 编解码继续由驱动自带的插件负�
 
 - **For testing only.** Unofficial, experimental, not production software — no warranty or support. It
   replaces a plug-in inside a third-party driver, may break on driver updates, and has only been run on
-  one machine. Keep the software path available as a fallback.
-- **Only verified on RTX 5070 Ti (GB203).** Other GB20x cards are supported by the code but untested on
-  real hardware — see [Verified hardware](#verified-hardware). All numbers in this README come from that
-  one card.
+  two GPUs. Keep the software path available as a fallback.
+- **Verified on RTX 5070 Ti (GB203) and RTX 5060 Ti (GB206) only.** Other GB20x cards are supported by
+  the code but untested on real hardware — see [Verified hardware](#verified-hardware). All 4K, encode
+  and correctness numbers in this README come from the 5070 Ti; the 5060 Ti only has a 1080p decode run.
 - **HEVC is not touched.** The shipped HEVC decoder and encoder work on these cards (717 fps 1080p decode,
   707 fps encode, verified `hvc1` output at 45 dB PSNR) and keep doing the job. This repository's own HEVC core
   hangs on P pictures on Blackwell, so it is not built into the H.264 plug-in.

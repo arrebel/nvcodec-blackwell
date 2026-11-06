@@ -22,12 +22,13 @@ chmod 755 "$STAGE/$NAME/plugins/"*.dylib
 
 cat > "$STAGE/$NAME/VERSION" <<EOF
 version=$VER
-tested_driver=2.7.1
-tested_gpu=GB203 (RTX 5070 Ti)
-tested_gpu_pci=0x2c05
+tested_driver=2.7.1, 2.7.2
+tested_gpu=GB203 (RTX 5070 Ti), GB206 (RTX 5060 Ti)
+tested_gpu_pci=0x2c05, 0x2d04
 tested_macos=26.7.2
-# 代码覆盖 0x2a00-0x2fff 整个 GB20x，但只有上面这一张卡实机验证过，其他型号未测。
-verified_gpu_only=GB203
+# 代码覆盖 0x2a00-0x2fff 整个 GB20x；实机验证仅 GB203 / GB206 两张卡，其余型号未测。
+# 2.7.1 / 0x2c05：5070 Ti 全套基准；2.7.2 / 0x2d04：5060 Ti 1080p 硬解 + 编码器注册（2026-11-06）。
+verified_gpus=GB203, GB206
 build=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 EOF
 

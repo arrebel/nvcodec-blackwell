@@ -8,7 +8,7 @@ code { font-family: Menlo, monospace; font-size: 12px; background: #f2f2f2; padd
 </style></head><body>
 <h2>安装完成</h2>
 <p>已装入 <code>libnvdec_h264.dylib</code> 与 <code>libnvencvt.dylib</code>，解码服务已重启。</p>
-<p class="warn">建议先跑一次实测确认（本插件只在一台 RTX 5070 Ti / GB203 上验证过）：
+<p class="warn">建议先跑一次实测确认（本插件已在 RTX 5070 Ti / GB203 与 RTX 5060 Ti / GB206 上验证过，其余型号未测）：
 用任意 VideoToolbox 解码测试工具跑 1080p H.264，或用 <code>tar.gz</code> 包里的
 <code>sudo ./install.sh --check</code> 查看当前装了哪一版。</p>
 <p>还原：<code>sudo /usr/local/bin/nvdec-uninstall</code>，或重新安装驱动。</p>
