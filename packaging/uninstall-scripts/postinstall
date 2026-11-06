@@ -1,0 +1,54 @@
+#!/bin/sh
+# postinstall — 双击卸载包时执行：还原原厂插件、关掉外挂开关、清理安装器留下的辅助文件。
+#
+# 为什么不删驱动目录里的 dylib：/Library/GPUBundles/NVMTLDriver.bundle/Contents/MacOS 带 SIP 的
+# restricted 标志，root 也不能在该目录里增删文件。所以卸载走驱动自己的配置开关，和
+# packaging/nvdec-uninstall 的策略一致：
+#   NVMTL_NO_NVDEC=1  不注册外挂 H.264 解码插件（HEVC 解码不受影响）
+#   NVMTL_NVENCVT=0   外挂编码插件不注册
+# 有原厂备份时先把备份拷回去（覆盖文件内容是允许的）。
+set -e
+B=/Library/GPUBundles/NVMTLDriver.bundle/Contents/MacOS
+CONF=/Library/GPUBundles/nvmtl/nvrm610.conf
+
+is_ours() { [ -f "$1" ] && strings -a "$1" 2>/dev/null | grep -q "nvcodec-blk-1401"; }
+
+RESTORED=0
+if [ -f "$B/libnvdec_h264.dylib.vendor" ] && ! is_ours "$B/libnvdec_h264.dylib.vendor"; then
+    cp -p "$B/libnvdec_h264.dylib.vendor" "$B/libnvdec_h264.dylib" 2>/dev/null || true
+    chown root:wheel "$B/libnvdec_h264.dylib" 2>/dev/null || true
+    chmod 755 "$B/libnvdec_h264.dylib" 2>/dev/null || true
+    echo "已还原原厂 libnvdec_h264.dylib"
+    RESTORED=1
+else
+    echo "没有可用的原厂备份，改用配置开关停用解码插件"
+fi
+
+if [ -f "$CONF" ] && [ -r "$CONF" ] && [ -w "$CONF" ]; then
+    [ -f "$CONF.orig" ] || cp -p "$CONF" "$CONF.orig" 2>/dev/null || true
+    # 不用临时文件：安装器环境里临时文件的清理可能被拒。
+    # 必须先确认配置可读，否则 KEEP 为空会把 nvrm610.conf 写坏。
+    KEEP=$(grep -vE '^(NVMTL_NVENCVT|NVMTL_NO_NVDEC)=' "$CONF" || true)
+    if [ "$RESTORED" = 1 ]; then
+        # 原厂插件回来了，不能再挂 NO_NVDEC，否则连原厂解码一起停掉
+        printf '%s\nNVMTL_NVENCVT=0\n' "$KEEP" > "$CONF"
+    else
+        printf '%s\nNVMTL_NO_NVDEC=1\nNVMTL_NVENCVT=0\n' "$KEEP" > "$CONF"
+    fi
+    chown root:wheel "$CONF" 2>/dev/null || true
+    chmod 644 "$CONF" 2>/dev/null || true
+    echo "已更新 $CONF"
+else
+    echo "没有 $CONF 或无权读写：跳过开关设置（驱动可能已被卸载）"
+fi
+
+killall VTDecoderXPCService 2>/dev/null || true
+killall VTEncoderXPCService 2>/dev/null || true
+
+# 安装包装进来的辅助文件不在 restricted 目录，可以安全清掉
+rm -f /usr/local/bin/nvdec-uninstall 2>/dev/null || true
+rm -rf /usr/local/share/nvcodec-blackwell 2>/dev/null || true
+echo "已清理 /usr/local/bin/nvdec-uninstall 与 /usr/local/share/nvcodec-blackwell"
+
+echo "卸载完成：H.264 由系统/原厂插件处理。"
+exit 0

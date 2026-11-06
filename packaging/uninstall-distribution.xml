@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="2">
+    <title>卸载 NVIDIA 视频编解码插件（H.264 / Blackwell）</title>
+    <organization>local.nvdec</organization>
+    <domains enable_localSystem="true" enable_currentUserHome="false"/>
+    <options customize="never" require-scripts="true" rootVolumeOnly="true" hostArchitectures="x86_64"/>
+
+    <welcome file="uninstall-welcome.html" mime-type="text/html"/>
+    <conclusion file="uninstall-conclusion.html" mime-type="text/html"/>
+
+    <choices-outline>
+        <line choice="default">
+            <line choice="nvdec-uninstall"/>
+        </line>
+    </choices-outline>
+    <choice id="default"/>
+    <choice id="nvdec-uninstall" visible="false">
+        <pkg-ref id="local.nvdec.blackwell.uninstall"/>
+    </choice>
+    <pkg-ref id="local.nvdec.blackwell.uninstall" version="1.2.0" onConclusion="none">uninstall.pkg</pkg-ref>
+</installer-gui-script>

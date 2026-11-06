@@ -74,7 +74,8 @@ numbers above are from the 5070 Ti only.
 
 ## Install
 
-Download the release (`.pkg` to double-click, or `.tar.gz` to read the scripts), or build it yourself:
+Download the release: `.pkg` to install by double-clicking, `.tar.gz` to read the scripts, and
+`NVCODEC-Blackwell-1401-Uninstall.pkg` to uninstall by double-clicking. Or build them yourself:
 
 ```sh
 sudo ./install.sh --check    # driver version, GPU id, what is installed now (changes nothing)
@@ -84,7 +85,9 @@ sudo ./install.sh
 `install.sh` replaces `libnvdec_h264.dylib` inside the driver bundle (keeping the original as
 `libnvdec_h264.dylib.vendor`, created once and never overwritten) and drops `libnvencvt.dylib` next to it.
 Uninstall with `sudo ./uninstall.sh`: it restores the backup if there is one, otherwise it turns the
-plug-ins off through the driver's own configuration switches.
+plug-ins off through the driver's own configuration switches. The standalone `...-Uninstall.pkg` does
+the same thing from the GUI and also removes the helper files installed by the `.pkg`; it carries no
+plug-in binaries and never touches the driver installation itself.
 
 ## 中文说明
 
@@ -106,7 +109,8 @@ plug-ins off through the driver's own configuration switches.
   `libnvdec_h264.dylib` 并只注册 `'avc1'`；编码插件是外挂的 `libnvencvt.dylib`，Blackwell 上只注册 H.264。
   仓库 `src/` 里还有 HEVC / AV1 / VP9 等上游源码，那只是链接公共代码所需的上游基线，**没有移植、没有注册、
   没有验证**；HEVC 完全不碰，解码和编码继续用驱动自带的插件。详见 [Scope](#scope)。
-- **装/卸**：`sudo ./install.sh --check` 先体检，`sudo ./install.sh` 安装，`sudo ./uninstall.sh` 回退。
+- **装/卸**：`sudo ./install.sh --check` 先体检，`sudo ./install.sh` 安装，`sudo ./uninstall.sh` 回退；
+  不想用命令行也可双击 Release 里的 `NVCODEC-Blackwell-1401-Uninstall.pkg`（独立卸载包，不含插件二进制）。
 - **驱动升级后**：新版驱动会把插件文件覆盖回官方版本，重跑一次 `install.sh` 即可。装完 `--check` 应显示"已安装（我们的版本）"。
 - **实测数字**：完整基准均来自 RTX 5070 Ti / GB203：1080p 解码 700–920 fps（软解 471），4K 解码 229 fps，
   1080p 编码 718 fps（软编 156）。RTX 5060 Ti / GB206 上另测得 1080p 硬解 779–800 fps。

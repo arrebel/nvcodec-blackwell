@@ -1,0 +1,20 @@
+<html><head><meta charset="utf-8"><style>
+body { font: 13px -apple-system, "Helvetica Neue", sans-serif; color: #111; }
+h2 { font-size: 15px; margin: 0 0 8px; }
+p { margin: 0 0 9px; line-height: 1.5; }
+code { font-family: Menlo, monospace; font-size: 12px; background: #f2f2f2; padding: 1px 4px; border-radius: 3px; }
+.warn { background: #fff6e5; border-left: 3px solid #e8a33d; padding: 8px 10px; margin: 0 0 10px; }
+.note { color: #555; font-size: 12px; }
+</style></head><body>
+<h2>卸载 50 系硬解 — H.264 解码 / 编码插件</h2>
+<p>双击即可卸载，不需要打开终端。这个包会：</p>
+<ul>
+<li>把安装时备份的原厂 <code>libnvdec_h264.dylib.vendor</code> 拷回去（如果存在）；</li>
+<li>否则通过驱动自带的开关停用外挂解码与编码插件；</li>
+<li>重启 VideoToolbox 解码 / 编码服务；</li>
+<li>清掉安装器留下的 <code>/usr/local/bin/nvdec-uninstall</code> 与 <code>/usr/local/share/nvcodec-blackwell/</code>。</li>
+</ul>
+<p class="warn"><b>不会动驱动本身。</b><code>NVMTLDriver.bundle/Contents/MacOS</code> 带 SIP <code>restricted</code>
+标志，即使 root 也无法在其中增删文件，因此插件文件保留、只靠开关停用；HEVC 的编解码始终由驱动自带插件负责，不受影响。</p>
+<p class="note">原厂备份文件 <code>*.dylib.vendor</code> 会保留，方便以后重新启用。想彻底清理，重装一遍 nullmoth 驱动即可。</p>
+</body></html>

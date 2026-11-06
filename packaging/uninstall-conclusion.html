@@ -1,0 +1,16 @@
+<html><head><meta charset="utf-8"><style>
+body { font: 13px -apple-system, "Helvetica Neue", sans-serif; color: #111; }
+h2 { font-size: 15px; margin: 0 0 8px; }
+p { margin: 0 0 9px; line-height: 1.5; }
+code { font-family: Menlo, monospace; font-size: 12px; background: #f2f2f2; padding: 1px 4px; border-radius: 3px; }
+.warn { background: #fff6e5; border-left: 3px solid #e8a33d; padding: 8px 10px; margin: 0 0 10px; }
+.note { color: #555; font-size: 12px; }
+</style></head><body>
+<h2>卸载完成</h2>
+<p>H.264 现在由系统 / 原厂插件处理。解码与编码服务已重启，安装器留下的辅助文件已清理。</p>
+<p class="warn">如果之前没有原厂备份，插件文件仍留在驱动目录里，只是通过
+<code>NVMTL_NO_NVDEC=1</code> / <code>NVMTL_NVENCVT=0</code> 停用。配置文件备份在
+<code>nvrm610.conf.orig</code>，需要时可手动查看。</p>
+<p>想重新装上：再运行一次 <code>NVCODEC-Blackwell-1401.pkg</code>，它的 postinstall 会清掉停用标记。</p>
+<p class="note">本包只涉及 H.264；HEVC 编解码一直由驱动自带插件处理，未做任何改动。</p>
+</body></html>

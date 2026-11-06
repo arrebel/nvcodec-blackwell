@@ -4,6 +4,7 @@ dist/
 packaging/root/
 packaging/stage/
 packaging/tgz-stage/
+packaging/uninstall-stage/
 
 # NVIDIA headers, fetched by fetch-vendor.sh (never commit: 50 MB, and not ours)
 vendor/
