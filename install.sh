@@ -18,7 +18,7 @@ CONF=${NVCODEC_CONF:-/Library/GPUBundles/nvmtl/nvrm610.conf}
 # 仓库里直接跑用 build/，打好的压缩包里用 plugins/
 SRC="$PWD/plugins"
 [ -f "$SRC/libnvdec_h264.dylib" ] || SRC="$PWD/build"
-TESTED_DRIVER=2.7.1
+TESTED_DRIVERS="2.7.1 2.7.2"
 
 die() { echo "错误：$*" >&2; exit 1; }
 info() { echo "  $*"; }
@@ -61,10 +61,13 @@ esac
   先装 nullmoth 的 1401 / NVRM 驱动（NVMTLDriver.bundle 必须已经存在）。"
 
 DRV=$(driver_version)
-echo "驱动：${DRV:-未知}（本插件在 $TESTED_DRIVER 上验证过）"
-if [ -n "$DRV" ] && [ "$DRV" != "$TESTED_DRIVER" ]; then
-    echo "  提示：版本和验证过的不同。插件是按文件名接进驱动目录的，通常照旧能用；"
-    echo "        装完跑一次编解码测试确认，出问题用 --uninstall 回退。"
+echo "驱动：${DRV:-未知}（实机验证：$TESTED_DRIVERS）"
+if [ -n "$DRV" ]; then
+    case " $TESTED_DRIVERS " in
+        *" $DRV "*) ;;
+        *) echo "  提示：版本和验证过的不同。插件是按文件名接进驱动目录的，通常照旧能用；"
+           echo "        装完跑一次编解码测试确认，出问题用 --uninstall 回退。" ;;
+    esac
 fi
 
 IDS=$(gpu_device_ids | tr '\n' ' ')

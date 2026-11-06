@@ -1,5 +1,5 @@
 #!/bin/sh
-# build-pkg.sh — 把插件打成可直接双击安装的增量包（在 1401 / 2.7.1 驱动之上）。
+# build-pkg.sh — 把插件打成可直接双击安装的增量包（按 1401 / 2.7.1 构建，2.7.2 也已实机验证）。
 #   sh packaging/build-pkg.sh        -> dist/NVDEC-Blackwell-1401-H264-1.0.pkg
 set -e
 cd "$(dirname "$0")/.."

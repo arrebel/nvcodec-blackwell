@@ -22,8 +22,9 @@ fi
 killall VTDecoderXPCService 2>/dev/null || true
 
 V=$(plutil -extract CFBundleShortVersionString raw /Library/Extensions/NVRM.kext/Contents/Info.plist 2>/dev/null || echo "?")
-if [ "$V" != "2.7.1" ]; then
-    echo "注意：当前 NVRM 版本为 $V，本包按 2.7.1 (1401) 构建。插件仍会装入，如遇问题可用 nvdec-uninstall 还原。"
-fi
+case "$V" in
+    2.7.1|2.7.2) ;;  # 均已实机验证：2.7.1 / 5070 Ti，2.7.2 / 5060 Ti
+    *) echo "注意：当前 NVRM 版本为 $V，本包按 2.7.1 (1401) 构建，实机验证过 2.7.1 与 2.7.2。插件仍会装入，如遇问题可用 nvdec-uninstall 还原。" ;;
+esac
 echo "H.264 硬件解码与编码插件已安装（卸载用 /usr/local/bin/nvdec-uninstall）。"
 exit 0
